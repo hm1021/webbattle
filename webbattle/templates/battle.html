@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% set lcount = 1 %}
+{% set rcount = 1 %}
+
+	<legend class="row">
+		<div class="span12">
+			<h1>Battle of {{ leftf }} vs {{ rightf }}</h1>
+		</div>
+	</legend>
+	<div class="row">
+		<div class="span6">
+			<ul id="leftcomments">
+				{% for c in lc %}
+				<li>
+					<i class="icon-arrow-up" id="lc_up{{ lcount }}" onclick=""></i> <i class="icon-arrow-down" id="lc_down{{ lcount }}"></i> 
+					<blockquote style="display:inline" id="lc{{ lcount }}">
+						{{ c.comment }} 
+						<small>by <cite title="name">{{ c.author.nickname() }}</cite></small>
+					</blockquote>
+				</li>
+				{% set lcount = lcount + 1 %}
+				{% endfor %}
+			</ul>
+			<form method="post" accept-charset="utf-8">
+				{{ left.csrf_token }}
+				<p>
+					<label for="left">Left Comment</label>
+					{{ left.comment(id="leftbox")|safe }}
+				</p>
+
+				<input type="button" id="leftbutton" name="leftb" value="Comment on Left"/>
+			</form>
+		</div>
+		<div class="span6">
+			<ul id="rightcomments">
+
+				{% for s in rc %}
+				<li> <i class="icon-arrow-up" id="rc_up{{ lcount }}"></i> <i class="icon-arrow-down" id="rc_down{{ lcount }}"></i> 
+					<blockquote style="display:inline" id="rc{{ rcount }}">
+						{{ s.comment }} 
+						<small>by <cite title="name">{{ s.author.nickname() }}</cite></small>
+					</blockquote>
+				</li>
+				{% set rcount = rcount + 1 %}
+				{% endfor %}
+			</ul>
+			<form method="post" accept-charset="utf-8">
+				{{ right.csrf_token }}
+				<p>
+					<label for="right">Right Comment</label>
+					{{ right.comment(id="rightbox")|safe }}
+				</p>
+				<input type="button" id="rightbutton" name="rightb" value="Comment on Right"/>
+			</form>
+		</div>
+	</div>
+
+
+<script>
+
+	$("#leftbutton").click(function() {
+		$.ajax({
+			url: '/battle/{{ leftf }}/{{ rightf }}',
+			data: { leftcomment : $("#leftbox").val() },
+			type: "POST"
+		}).success(function(data){
+			new_comment_l = '\
+			<li> <i class="icon-arrow-up"></i> <i class="icon-arrow-down"></i>\
+					<blockquote style="display:inline" id="lc0"> ' + data.lc + ' by ' + data.author + ' </blockquote>\
+			</li>\
+			'
+			$("#leftcomments").append(new_comment_l);
+			$("#leftbox").val("");
+			$("#rightbox").val("");
+		})
+
+	});
+
+
+	$("#rightbutton").click(function() {
+		$.ajax({
+			url: '/battle/{{ leftf }}/{{ rightf }}',
+			data: { rightcomment : $("#rightbox").val() },
+			type: "POST"
+		}).success(function(data){
+			new_comment_r = '\
+			<li> <i class="icon-arrow-up"></i> <i class="icon-arrow-down"></i>\
+					<blockquote style="display:inline" id="rc0">' + data.rc + ' by ' + data.author + ' </blockquote>\
+			</li>\
+			'
+			$("#rightcomments").append(new_comment_r);
+			$("#leftbox").val("");
+			$("#rightbox").val("");
+		})
+	});
+
+</script>
+{% endblock %}

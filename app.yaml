@@ -1,0 +1,15 @@
+application: webbattle
+version: 3
+runtime: python
+api_version: 1
+
+handlers:
+
+- url: /css
+  static_dir: webbattle/css
+
+- url: /img
+  static_dir: webbattle/img
+
+- url: .*
+  script: main.py

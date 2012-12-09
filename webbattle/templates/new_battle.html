@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1 id="">WebBattle</h1>
+	<h2 id="">Create a WebBattle</h2>
+	<form action="{{ url_for('index') }}" method="post" accept-charset="utf-8">
+		{{ form.csrf_token }}
+		<p>
+			<label for="left">{{ form.left.label }}</lable>
+
+			{{ form.left|safe }}
+
+			{% if form.left.errors %}
+			<ul class="errors">
+				{% for error in form.left.errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</p>
+		<p>
+			<label for="right">{{ form.right.label }}</lable>
+
+			{{ form.right|safe }}
+
+			{% if form.right.errors %}
+			<ul class="errors">
+				{% for error in form.right.errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</p>
+		<p><input type="submit" value="Save Battle"/></p>
+    </form>
+    <h2>Existing WebBattles</h1>
+    <ul>
+    	{% for battle in battles %}
+    	<li>
+    		<a href="/battle/{{ battle.left }}/{{ battle.right }}">{{ battle.left }} vs {{ battle.right }}</a>
+    	</li>
+    	{% endfor %}
+    </ul>
+{% endblock %}
