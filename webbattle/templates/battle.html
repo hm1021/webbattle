@@ -15,10 +15,17 @@
 			<ul id="leftcomments">
 				{% for c in lc %}
 				<li>
-					<i class="icon-arrow-up" id="lc_up{{ lcount }}" onclick=""></i> <i class="icon-arrow-down" id="lc_down{{ lcount }}"></i> 
-					<blockquote style="display:inline" id="lc{{ lcount }}">
+					<a href="#" onclick="upvote_left('{{ c.comment }}','{{ c.author }}','{{ c.when }}', 'lc_up{{ lcount }}')">
+						<i class="icon-arrow-up"></i>
+					</a><div id="lc_up{{ lcount }}">{{ c.upvotes }}</div>
+					<a href="#" onclick="downvote_left('{{ c.comment }}','{{ c.author }}','{{ c.when }}')">
+						<i class="icon-arrow-down" id="lc_down{{ lcount }}"></i>
+					</a> 
+					<blockquote id="lc{{ lcount }}">
 						{{ c.comment }} 
-						<small>by <cite title="name">{{ c.author.nickname() }}</cite></small>
+						<small>
+							by <cite title="name">{{ c.author.nickname() }}</cite>
+						</small>
 					</blockquote>
 				</li>
 				{% set lcount = lcount + 1 %}
@@ -38,10 +45,18 @@
 			<ul id="rightcomments">
 
 				{% for s in rc %}
-				<li> <i class="icon-arrow-up" id="rc_up{{ lcount }}"></i> <i class="icon-arrow-down" id="rc_down{{ lcount }}"></i> 
+				<li> 
+					<a href="#" onclick="upvote_right('{{ s.comment }}','{{ s.author }}','{{ s.when }}')">
+						<i class="icon-arrow-up" id="rc_up{{ lcount }}"></i>
+					</a>
+					<a href="#" onclick="downvote_right('{{ s.comment }}','{{ s.author }}','{{ s.when }}')">
+						<i class="icon-arrow-down" id="rc_down{{ lcount }}"></i>
+					</a> 
 					<blockquote style="display:inline" id="rc{{ rcount }}">
 						{{ s.comment }} 
-						<small>by <cite title="name">{{ s.author.nickname() }}</cite></small>
+						<small>
+							by <cite title="name">{{ s.author.nickname() }}</cite>
+						</small>
 					</blockquote>
 				</li>
 				{% set rcount = rcount + 1 %}
@@ -96,6 +111,46 @@
 			$("#rightbox").val("");
 		})
 	});
+
+	function upvote_left(comment,author,when,count){
+		$.ajax({
+			url: '/battle/upvote/{{ leftf }}/{{ rightf }}',
+			data: { side : "left", comment : comment, author : author, when : when },
+			type: "POST"
+		}).success(function(data) {
+			$("#"+count).html(data.upvotes)
+		})
+	}
+
+	function upvote_right(comment,author,when){
+		$.ajax({
+			url: '/battle/upvote/{{ leftf }}/{{ rightf }}',
+			data: { side : "right", comment : comment, author : author, when : when },
+			type: "POST"
+		}).success(function(data) {
+			alert(data.upvotes)
+		})
+	}
+
+	function downvote_left(comment,author,when){
+		$.ajax({
+			url: '/battle/downvote/{{ leftf }}/{{ rightf }}',
+			data: { side : "left", comment : comment, author : author, when : when },
+			type: "POST"
+		}).success(function(data) {
+			alert(data.comment)
+		})
+	}
+
+	function downvote_right(comment,author,when){
+		$.ajax({
+			url: '/battle/downvote/{{ leftf }}/{{ rightf }}',
+			data: { side : "right", comment : comment, author : author, when : when },
+			type: "POST"
+		}).success(function(data) {
+			alert(data.comment)
+		})
+	}
 
 </script>
 {% endblock %}

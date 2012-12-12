@@ -1,4 +1,4 @@
-application: webbattle
+application: web-battle
 version: 3
 runtime: python
 api_version: 1

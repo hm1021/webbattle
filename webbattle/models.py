@@ -11,9 +11,10 @@ class Battle(db.Model):
 class Comment(db.Model):
 	comment = db.StringProperty(required = True,multiline = True)
 	author = db.UserProperty(required = True)
-	votes = db.IntegerProperty()
+	upvotes = db.IntegerProperty(default = 0)
+	downvotes = db.IntegerProperty(default = 0)
 	side = db.StringProperty(required = True)
-	when = db.DateTimeProperty(auto_now_add = True)
+	when = db.DateTimeProperty(required = True)
 
 class UserVote(db.Model):
 	author = db.UserProperty(required = True)
