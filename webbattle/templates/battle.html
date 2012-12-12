@@ -10,69 +10,83 @@
 			<h1>Battle of {{ leftf }} vs {{ rightf }}</h1>
 		</div>
 	</legend>
-	<div class="row">
-		<div class="span6">
-			<ul id="leftcomments">
-				{% for c in lc %}
-				<li>
-					<a href="#" onclick="upvote_left('{{ c.comment }}','{{ c.author }}','{{ c.when }}', 'lc_up{{ lcount }}')">
-						<i class="icon-arrow-up"></i>
-					</a><div id="lc_up{{ lcount }}">{{ c.upvotes }}</div>
-					<a href="#" onclick="downvote_left('{{ c.comment }}','{{ c.author }}','{{ c.when }}')">
-						<i class="icon-arrow-down" id="lc_down{{ lcount }}"></i>
-					</a> 
-					<blockquote id="lc{{ lcount }}">
-						{{ c.comment }} 
-						<small>
-							by <cite title="name">{{ c.author.nickname() }}</cite>
-						</small>
-					</blockquote>
-				</li>
-				{% set lcount = lcount + 1 %}
-				{% endfor %}
-			</ul>
-			<form method="post" accept-charset="utf-8">
-				{{ left.csrf_token }}
-				<p>
-					<label for="left">Left Comment</label>
-					{{ left.comment(id="leftbox")|safe }}
-				</p>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span6">
+				<div id = "leftcomments">
+					{% for c in lc %}
+						<div class="row">
+							<div class="span1">
+								<a href="#" onclick="upvote_left('{{ c.comment }}','{{ c.author.email() }}','{{ c.when }}', 'lc_up{{ lcount }}')">
+									<i class="icon-arrow-up"></i>
+								</a>
+								{% set votes = c.upvotes - c.downvotes %}
+								<div id="lc_up{{ lcount }}">{{ votes }}</div>
+								<a href="#" onclick="downvote_left('{{ c.comment }}','{{ c.author.email() }}','{{ c.when }}','lc_up{{ lcount }}')">
+									<i class="icon-arrow-down"></i>
+								</a>
+							</div>
+							<div class="span11">
+								<blockquote id="left_comment">
+									{{ c.comment }} 
+									<small>
+										by <cite title="name">{{ c.author.nickname() }}</cite>
+									</small>
+								</blockquote>
+							</div>
+						</div>
+						{% set lcount = lcount + 1 %}
+					{% endfor %}
+				</div>
+				<form method="post" accept-charset="utf-8">
+					{{ left.csrf_token }}
+					<p>
+						<label for="left">Left Comment</label>
+						{{ left.comment(id="leftbox")|safe }}
+					</p>
 
-				<input type="button" id="leftbutton" name="leftb" value="Comment on Left"/>
-			</form>
-		</div>
-		<div class="span6">
-			<ul id="rightcomments">
+					<input type="button" id="leftbutton" name="leftb" value="Comment on Left"/>
+				</form>
+			</div>
 
-				{% for s in rc %}
-				<li> 
-					<a href="#" onclick="upvote_right('{{ s.comment }}','{{ s.author }}','{{ s.when }}')">
-						<i class="icon-arrow-up" id="rc_up{{ lcount }}"></i>
-					</a>
-					<a href="#" onclick="downvote_right('{{ s.comment }}','{{ s.author }}','{{ s.when }}')">
-						<i class="icon-arrow-down" id="rc_down{{ lcount }}"></i>
-					</a> 
-					<blockquote style="display:inline" id="rc{{ rcount }}">
-						{{ s.comment }} 
-						<small>
-							by <cite title="name">{{ s.author.nickname() }}</cite>
-						</small>
-					</blockquote>
-				</li>
-				{% set rcount = rcount + 1 %}
-				{% endfor %}
-			</ul>
-			<form method="post" accept-charset="utf-8">
-				{{ right.csrf_token }}
-				<p>
-					<label for="right">Right Comment</label>
-					{{ right.comment(id="rightbox")|safe }}
-				</p>
-				<input type="button" id="rightbutton" name="rightb" value="Comment on Right"/>
-			</form>
+			<div class="span6">
+				<div id = "rightcomments">
+					{% for s in rc %}
+						<div class="row-fluid">
+							<div class="span1">
+								<a href="#" onclick="upvote_right('{{ s.comment }}','{{ s.author.email() }}','{{ s.when }}', 'rc_up{{ rcount }}')">
+									<i class="icon-arrow-up"></i>
+								</a>
+								{% set vote = s.upvotes - s.downvotes %}
+								<div id="rc_up{{ rcount }}">{{ vote }}</div>
+								<a href="#" onclick="downvote_right('{{ s.comment }}','{{ s.author.email() }}','{{ s.when }}','rc_up{{ rcount }}')">
+									<i class="icon-arrow-down"></i>
+								</a>
+							</div>
+							<div class="span11">
+								<blockquote id="right_comment">
+									{{ s.comment }} 
+									<small>
+										by <cite title="name">{{ s.author.nickname() }}</cite>
+									</small>
+								</blockquote>
+							</div>
+						</div>
+						{% set rcount = rcount + 1 %}
+					{% endfor %}
+				</div>
+				<form method="post" accept-charset="utf-8">
+					{{ right.csrf_token }}
+					<p>
+						<label for="left">Right Comment</label>
+						{{ right.comment(id="rightbox")|safe }}
+					</p>
+
+					<input type="button" id="rightbutton" name="rightb" value="Comment on Right"/>
+				</form>
+			</div>
 		</div>
 	</div>
-
 
 <script>
 
@@ -82,11 +96,7 @@
 			data: { leftcomment : $("#leftbox").val() },
 			type: "POST"
 		}).success(function(data){
-			new_comment_l = '\
-			<li> <i class="icon-arrow-up"></i> <i class="icon-arrow-down"></i>\
-					<blockquote style="display:inline" id="lc0"> ' + data.lc + ' by ' + data.author + ' </blockquote>\
-			</li>\
-			'
+			new_comment_l = '<blockquote id="left_comment">' + data.lc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
 			$("#leftcomments").append(new_comment_l);
 			$("#leftbox").val("");
 			$("#rightbox").val("");
@@ -101,11 +111,7 @@
 			data: { rightcomment : $("#rightbox").val() },
 			type: "POST"
 		}).success(function(data){
-			new_comment_r = '\
-			<li> <i class="icon-arrow-up"></i> <i class="icon-arrow-down"></i>\
-					<blockquote style="display:inline" id="rc0">' + data.rc + ' by ' + data.author + ' </blockquote>\
-			</li>\
-			'
+			new_comment_r = '<blockquote id="right_comment">' + data.rc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
 			$("#rightcomments").append(new_comment_r);
 			$("#leftbox").val("");
 			$("#rightbox").val("");
@@ -118,37 +124,37 @@
 			data: { side : "left", comment : comment, author : author, when : when },
 			type: "POST"
 		}).success(function(data) {
-			$("#"+count).html(data.upvotes)
+			$("#"+count).html(data.votes)
 		})
 	}
 
-	function upvote_right(comment,author,when){
+	function upvote_right(comment,author,when,count){
 		$.ajax({
 			url: '/battle/upvote/{{ leftf }}/{{ rightf }}',
 			data: { side : "right", comment : comment, author : author, when : when },
 			type: "POST"
 		}).success(function(data) {
-			alert(data.upvotes)
+			$("#"+count).html(data.votes)
 		})
 	}
 
-	function downvote_left(comment,author,when){
+	function downvote_left(comment,author,when,count){
 		$.ajax({
 			url: '/battle/downvote/{{ leftf }}/{{ rightf }}',
 			data: { side : "left", comment : comment, author : author, when : when },
 			type: "POST"
 		}).success(function(data) {
-			alert(data.comment)
+			$("#"+count).html(data.votes)
 		})
 	}
 
-	function downvote_right(comment,author,when){
+	function downvote_right(comment,author,when,count){
 		$.ajax({
 			url: '/battle/downvote/{{ leftf }}/{{ rightf }}',
 			data: { side : "right", comment : comment, author : author, when : when },
 			type: "POST"
 		}).success(function(data) {
-			alert(data.comment)
+			$("#"+count).html(data.votes)
 		})
 	}
 

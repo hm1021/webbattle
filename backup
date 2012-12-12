@@ -1,0 +1,76 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			<!-- <ul id="leftcomments">
+				{% for c in lc %}
+				<li>
+					<a href="#" onclick="upvote_left('{{ c.comment }}','{{ c.author }}','{{ c.when }}', 'lc_up{{ lcount }}')">
+						<i class="icon-arrow-up"></i>
+					</a><div id="lc_up{{ lcount }}">{{ c.upvotes }}</div>
+					<a href="#" onclick="downvote_left('{{ c.comment }}','{{ c.author }}','{{ c.when }}')">
+						<i class="icon-arrow-down" id="lc_down{{ lcount }}"></i>
+					</a> 
+					<blockquote id="lc{{ lcount }}">
+						{{ c.comment }} 
+						<small>
+							by <cite title="name">{{ c.author.nickname() }}</cite>
+						</small>
+					</blockquote>
+				</li>
+				{% set lcount = lcount + 1 %}
+				{% endfor %}
+			</ul>
+			<form method="post" accept-charset="utf-8">
+				{{ left.csrf_token }}
+				<p>
+					<label for="left">Left Comment</label>
+					{{ left.comment(id="leftbox")|safe }}
+				</p>
+
+				<input type="button" id="leftbutton" name="leftb" value="Comment on Left"/>
+			</form>
+		</div> -->
+		<!-- <div class="span6">
+			<ul id="rightcomments">
+
+				{% for s in rc %}
+				<li> 
+					<a href="#" onclick="upvote_right('{{ s.comment }}','{{ s.author }}','{{ s.when }}')">
+						<i class="icon-arrow-up" id="rc_up{{ lcount }}"></i>
+					</a>
+					<a href="#" onclick="downvote_right('{{ s.comment }}','{{ s.author }}','{{ s.when }}')">
+						<i class="icon-arrow-down" id="rc_down{{ lcount }}"></i>
+					</a> 
+					<blockquote style="display:inline" id="rc{{ rcount }}">
+						{{ s.comment }} 
+						<small>
+							by <cite title="name">{{ s.author.nickname() }}</cite>
+						</small>
+					</blockquote>
+				</li>
+				{% set rcount = rcount + 1 %}
+				{% endfor %}
+			</ul>
+			<form method="post" accept-charset="utf-8">
+				{{ right.csrf_token }}
+				<p>
+					<label for="right">Right Comment</label>
+					{{ right.comment(id="rightbox")|safe }}
+				</p>
+				<input type="button" id="rightbutton" name="rightb" value="Comment on Right"/>
+			</form>
+		</div>
+	</div>-->
+

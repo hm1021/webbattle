@@ -1,7 +1,8 @@
 application: web-battle
-version: 3
-runtime: python
+version: 7 
+runtime: python27
 api_version: 1
+threadsafe: true 
 
 handlers:
 
@@ -12,4 +13,4 @@ handlers:
   static_dir: webbattle/img
 
 - url: .*
-  script: main.py
+  script: main.app

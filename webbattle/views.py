@@ -53,7 +53,7 @@ def left_right(leftf,rightf):
 	right_comments = Comment.all().ancestor(battle_key(leftf,rightf)).filter('side =','right')
 	time = datetime.now()
 	if request.form.get('leftcomment'):
-		leftComment = Comment(key_name = comment_key(request.form.get('leftcomment'),users.get_current_user(),str(time)),
+		leftComment = Comment(key_name = request.form.get('leftcomment')+users.get_current_user().nickname()+str(time),
 							parent=battle_key(leftf,rightf),
 							comment = request.form.get('leftcomment'),
 							author = users.get_current_user(),
@@ -62,7 +62,7 @@ def left_right(leftf,rightf):
 		leftComment.put()
 		return jsonify(lc=request.form.get('leftcomment'),author=users.get_current_user().nickname())
 	elif request.form.get('rightcomment'):
-		rightComment = Comment(key_name = comment_key(request.form.get('leftcomment'),users.get_current_user(),str(time)),
+		rightComment = Comment(key_name = request.form.get('rightcomment')+users.get_current_user().nickname()+str(time),
 							parent=battle_key(leftf,rightf),
 							comment = request.form.get('rightcomment'),
 							author = users.get_current_user(),
@@ -78,15 +78,17 @@ def upvote_comment(leftf,rightf):
 	current_comment = comments.filter('comment =',request.form.get('comment')).filter('author =',users.User(request.form.get('author'))).filter('when =',datetime.strptime(request.form.get('when'),'%Y-%m-%d %H:%M:%S.%f')).get()
 	current_comment.upvotes = current_comment.upvotes + 1
 	current_comment.put()
-	return jsonify(upvotes=current_comment.upvotes)
+	votes = current_comment.upvotes - current_comment.downvotes
+	return jsonify(votes=votes)
 
 @app.route('/battle/downvote/<leftf>/<rightf>',methods = ['GET','POST'])
 def downvote_comment(leftf,rightf):
 	comments = Comment.all().ancestor(battle_key(leftf,rightf)).filter('side =',request.form.get('side'))
 	current_comment = comments.filter('comment =',request.form.get('comment')).filter('author =',users.User(request.form.get('author'))).filter('when =',datetime.strptime(request.form.get('when'),'%Y-%m-%d %H:%M:%S.%f')).get()
-	current_comment.upvotes = current_comment.downvotes + 1
+	current_comment.downvotes = current_comment.downvotes + 1
 	current_comment.put()
-	return jsonify(comment=current_comment.comment)
+	votes = current_comment.upvotes - current_comment.downvotes
+	return jsonify(votes=votes)
 
 @app.route('/',methods = ['GET','POST'])
 @login_required
