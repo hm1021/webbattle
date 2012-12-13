@@ -40,14 +40,13 @@
 						{% set lcount = lcount + 1 %}
 					{% endfor %}
 				</div>
-				<form method="post" accept-charset="utf-8">
+				<form method="post" action="/battle/{{ leftf }}/{{ rightf }}" accept-charset="utf-8" enctype="multipart/form-data">
 					{{ left.csrf_token }}
 					<p>
 						<label for="left">Left Comment</label>
 						{{ left.comment(id="leftbox", maxlength=140, placeholder="max 140 charachers only")|safe }}
 					</p>
-
-					<input type="button" id="leftbutton" name="leftb" value="Comment on Left"/>
+					<input type="submit" id="leftbutton" name="leftb" value="Comment on Left"/>
 					<input type="file" name="left_image"/>
 				</form>
 			</div>
@@ -78,14 +77,14 @@
 						{% set rcount = rcount + 1 %}
 					{% endfor %}
 				</div>
-				<form method="post" accept-charset="utf-8">
+				<form method="post" action="/battle/{{ leftf }}/{{ rightf }}" accept-charset="utf-8">
 					{{ right.csrf_token }}
 					<p>
 						<label for="left">Right Comment</label>
 						{{ right.comment(id="rightbox", maxlength=140, placeholder="max 140 charachers only")|safe }}
 					</p>
 
-					<input type="button" id="rightbutton" name="rightb" value="Comment on Right"/>
+					<input type="submit" id="rightbutton" name="rightb" value="Comment on Right"/>
 					<input type="file" name="right_image"/>
 				</form>
 			</div>
@@ -94,33 +93,36 @@
 
 <script>
 
-	$("#leftbutton").click(function() {
-		$.ajax({
-			url: '/battle/{{ leftf }}/{{ rightf }}',
-			data: { leftcomment : $("#leftbox").val() },
-			type: "POST"
-		}).success(function(data){
-			new_comment_l = '<blockquote id="left_comment">' + data.lc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
-			$("#leftcomments").append(new_comment_l);
-			$("#leftbox").val("");
-			$("#rightbox").val("");
-		})
+	$("#leftbox").val("");
+	$("#rightbox").val("");
 
-	});
+	// $("#leftbutton").click(function() {
+	// 	$.ajax({
+	// 		url: '/battle/{{ leftf }}/{{ rightf }}',
+	// 		data: { leftcomment : $("#leftbox").val() },
+	// 		type: "POST"
+	// 	}).success(function(data){
+	// 		new_comment_l = '<blockquote id="left_comment">' + data.lc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
+	// 		$("#leftcomments").append(new_comment_l);
+	// 		$("#leftbox").val("");
+	// 		$("#rightbox").val("");
+	// 	})
+
+	// });
 
 
-	$("#rightbutton").click(function() {
-		$.ajax({
-			url: '/battle/{{ leftf }}/{{ rightf }}',
-			data: { rightcomment : $("#rightbox").val() },
-			type: "POST"
-		}).success(function(data){
-			new_comment_r = '<blockquote id="right_comment">' + data.rc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
-			$("#rightcomments").append(new_comment_r);
-			$("#leftbox").val("");
-			$("#rightbox").val("");
-		})
-	});
+	// $("#rightbutton").click(function() {
+	// 	$.ajax({
+	// 		url: '/battle/{{ leftf }}/{{ rightf }}',
+	// 		data: { rightcomment : $("#rightbox").val() },
+	// 		type: "POST"
+	// 	}).success(function(data){
+	// 		new_comment_r = '<blockquote id="right_comment">' + data.rc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
+	// 		$("#rightcomments").append(new_comment_r);
+	// 		$("#leftbox").val("");
+	// 		$("#rightbox").val("");
+	// 	})
+	// });
 
 	function upvote_left(comment,author,when,count){
 		$.ajax({

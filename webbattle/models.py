@@ -9,6 +9,7 @@ class Battle(db.Model):
 	comments = db.StringProperty(multiline = True)
 	when = db.DateTimeProperty(auto_now_add = True)
 	subscribers = db.StringListProperty()
+	tags = db.StringListProperty()
 
 class Comment(db.Model):
 	comment = db.StringProperty(required = True,multiline = True)
