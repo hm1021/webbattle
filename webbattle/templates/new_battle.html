@@ -35,10 +35,43 @@
     </form>
     <h2>Existing WebBattles</h1>
     <ul>
+    	{% set count = 0 %}
     	{% for battle in battles %}
+		{% set votes = battle.upvotes - battle.downvotes %}
     	<li>
-    		<a href="/battle/{{ battle.left }}/{{ battle.right }}">{{ battle.left }} vs {{ battle.right }}</a>
+    		<div id="battle{{ count }}">{{ votes }}</div>
+    		<a href="#" onclick="upvote('{{ battle.left }}','{{ battle.right }}','battle{{ count }}')">
+				<i class="icon-arrow-up"></i>
+			</a>
+			<a href="#" onclick="downvote('{{ battle.left }}','{{ battle.right }}','battle{{ count }}')">
+				<i class="icon-arrow-down"></i>
+			</a>
+			<a href="/battle/{{ battle.left }}/{{ battle.right }}">{{ battle.left }} vs {{ battle.right }}</a>
     	</li>
+    	{% set count = count + 1 %}
     	{% endfor %}
     </ul>
+
+    <script>
+    	function upvote(left,right,count){
+    		$.ajax({
+    			url: '/upvote',
+    			data: { left : left, right : right},
+    			type: "POST"
+    		}).success(function(data){
+    			$("#"+count).html(data.votes)
+    		})
+    	}
+
+    	function downvote(left,right,count){
+    		$.ajax({
+    			url: '/downvote',
+    			data: { left : left, right : right},
+    			type: "POST"
+    		}).success(function(data){
+    			$("#"+count).html(data.votes)
+    		})
+    	}
+    </script>
+
 {% endblock %}

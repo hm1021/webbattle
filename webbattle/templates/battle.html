@@ -8,6 +8,8 @@
 	<legend class="row">
 		<div class="span12">
 			<h1>Battle of {{ leftf }} vs {{ rightf }}</h1>
+			<a href="#" onclick="subscribe()">subscribe</a>
+			<a href="#" onclick="unsubscribe()">unsubscribe</a>
 		</div>
 	</legend>
 	<div class="container-fluid">
@@ -20,7 +22,7 @@
 								<a href="#" onclick="upvote_left('{{ c.comment }}','{{ c.author.email() }}','{{ c.when }}', 'lc_up{{ lcount }}')">
 									<i class="icon-arrow-up"></i>
 								</a>
-								{% set votes = c.upvotes - c.downvotes %}
+								{% set votes = c.votes %}
 								<div id="lc_up{{ lcount }}">{{ votes }}</div>
 								<a href="#" onclick="downvote_left('{{ c.comment }}','{{ c.author.email() }}','{{ c.when }}','lc_up{{ lcount }}')">
 									<i class="icon-arrow-down"></i>
@@ -42,10 +44,11 @@
 					{{ left.csrf_token }}
 					<p>
 						<label for="left">Left Comment</label>
-						{{ left.comment(id="leftbox")|safe }}
+						{{ left.comment(id="leftbox", maxlength=140, placeholder="max 140 charachers only")|safe }}
 					</p>
 
 					<input type="button" id="leftbutton" name="leftb" value="Comment on Left"/>
+					<input type="file" name="left_image"/>
 				</form>
 			</div>
 
@@ -57,7 +60,7 @@
 								<a href="#" onclick="upvote_right('{{ s.comment }}','{{ s.author.email() }}','{{ s.when }}', 'rc_up{{ rcount }}')">
 									<i class="icon-arrow-up"></i>
 								</a>
-								{% set vote = s.upvotes - s.downvotes %}
+								{% set vote = s.votes %}
 								<div id="rc_up{{ rcount }}">{{ vote }}</div>
 								<a href="#" onclick="downvote_right('{{ s.comment }}','{{ s.author.email() }}','{{ s.when }}','rc_up{{ rcount }}')">
 									<i class="icon-arrow-down"></i>
@@ -79,10 +82,11 @@
 					{{ right.csrf_token }}
 					<p>
 						<label for="left">Right Comment</label>
-						{{ right.comment(id="rightbox")|safe }}
+						{{ right.comment(id="rightbox", maxlength=140, placeholder="max 140 charachers only")|safe }}
 					</p>
 
 					<input type="button" id="rightbutton" name="rightb" value="Comment on Right"/>
+					<input type="file" name="right_image"/>
 				</form>
 			</div>
 		</div>
@@ -155,6 +159,24 @@
 			type: "POST"
 		}).success(function(data) {
 			$("#"+count).html(data.votes)
+		})
+	}
+
+	function subscribe() {
+		$.ajax({
+			url: '/battle/subscribe/{{ leftf }}/{{ rightf }}',
+			type: "POST"
+		}).success(function() {
+			alert("Thank you for your subscription. You will receive an email update whenever someone comments on this battle.")
+		})
+	}
+
+	function unsubscribe() {
+		$.ajax({
+			url: '/battle/unsubscribe/{{ leftf }}/{{ rightf }}',
+			type: "POST"
+		}).success(function() {
+			alert("You have been unsubscribed from the Battle.")
 		})
 	}
 
