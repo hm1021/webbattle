@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<legend>
+	Existing Battles
+</legend>
+	{% set count = 0 %}
+	{% for battle in battles %}
+		{% set votes = battle.votes %}
+			<div class="row-fluid">
+				<div class="span1">
+					<div class="pull-right">
+						<a href="#" onclick="vote('{{ battle.key() }}','battle{{ count }}', 'up')">
+							<i class="icon-arrow-up"></i>
+						</a>
+						<div id="battle{{ count }}">{{ votes }}</div>
+						<a href="#" onclick="vote('{{ battle.key() }}','battle{{ count }}', 'down')">
+							<i class="icon-arrow-down"></i>
+						</a>
+					</div>
+				</div>
+				<div class="span11">
+					<a href="/battles/{{ battle.key() }}">{{ battle.left }} vs {{ battle.right }}</a>
+				</div>
+			</div>
+			<hr>
+	    {% set count = count + 1 %}
+	{% endfor %}
+	<script>
+    	function vote(key,count,up_or_down) {
+    		$.ajax({
+    			url: '/battle/vote/' + key + "/" + up_or_down
+    		}).success(function(data){
+    			$("#"+count).html(data.votes)
+    		})
+    	}
+    </script>
+
+{% endblock %}

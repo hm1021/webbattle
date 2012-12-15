@@ -5,160 +5,104 @@
 {% set lcount = 1 %}
 {% set rcount = 1 %}
 
-	<legend class="row">
-		<div class="span12">
-			<h1>Battle of {{ leftf }} vs {{ rightf }}</h1>
-			<a href="#" onclick="subscribe()">subscribe</a>
-			<a href="#" onclick="unsubscribe()">unsubscribe</a>
-		</div>
+	<legend>
+		<h1>Battle of {{ leftf }} vs {{ rightf }}</h1>
 	</legend>
-	<div class="container-fluid">
-		<div class="row-fluid">
-			<div class="span6">
-				<div id = "leftcomments">
-					{% for c in lc %}
-						<div class="row">
-							<div class="span1">
-								<a href="#" onclick="upvote_left('{{ c.comment }}','{{ c.author.email() }}','{{ c.when }}', 'lc_up{{ lcount }}')">
-									<i class="icon-arrow-up"></i>
-								</a>
-								{% set votes = c.votes %}
-								<div id="lc_up{{ lcount }}">{{ votes }}</div>
-								<a href="#" onclick="downvote_left('{{ c.comment }}','{{ c.author.email() }}','{{ c.when }}','lc_up{{ lcount }}')">
-									<i class="icon-arrow-down"></i>
-								</a>
-							</div>
-							<div class="span11">
-								<blockquote id="left_comment">
-									{{ c.comment }} 
-									<small>
-										by <cite title="name">{{ c.author.nickname() }}</cite>
-									</small>
-								</blockquote>
-							</div>
-						</div>
-						{% set lcount = lcount + 1 %}
-					{% endfor %}
-				</div>
-				<form method="post" action="/battle/{{ leftf }}/{{ rightf }}" accept-charset="utf-8" enctype="multipart/form-data">
-					{{ left.csrf_token }}
-					<p>
-						<label for="left">Left Comment</label>
-						{{ left.comment(id="leftbox", maxlength=140, placeholder="max 140 charachers only")|safe }}
-					</p>
-					<input type="submit" id="leftbutton" name="leftb" value="Comment on Left"/>
-					<input type="file" name="left_image"/>
-				</form>
-			</div>
 
-			<div class="span6">
-				<div id = "rightcomments">
-					{% for s in rc %}
-						<div class="row-fluid">
-							<div class="span1">
-								<a href="#" onclick="upvote_right('{{ s.comment }}','{{ s.author.email() }}','{{ s.when }}', 'rc_up{{ rcount }}')">
-									<i class="icon-arrow-up"></i>
-								</a>
-								{% set vote = s.votes %}
-								<div id="rc_up{{ rcount }}">{{ vote }}</div>
-								<a href="#" onclick="downvote_right('{{ s.comment }}','{{ s.author.email() }}','{{ s.when }}','rc_up{{ rcount }}')">
-									<i class="icon-arrow-down"></i>
-								</a>
+	<div id="alert" class="alert alert-success hide">
+	</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span6">
+					<div id = "leftcomments">
+						{% for c in lc %}
+							<div class="row">
+								<div class="span1">
+									<a href="#" onclick="vote('{{ c.key() }}','lc_up{{ lcount }}','up')">
+										<i class="icon-arrow-up"></i>
+									</a>
+									{% set votes = c.votes %}
+									<div id="lc_up{{ lcount }}">{{ votes }}</div>
+									<a href="#" onclick="vote('{{ c.key() }}','lc_up{{ lcount }}','down')">
+										<i class="icon-arrow-down"></i>
+									</a>
+								</div>
+								<div class="span11">
+									<blockquote id="left_comment">
+										{{ c.comment }} 
+										<small>
+											by <cite>{{ c.author.nickname() }}</cite>
+										</small>
+									</blockquote>
+								</div>
 							</div>
-							<div class="span11">
-								<blockquote id="right_comment">
-									{{ s.comment }} 
-									<small>
-										by <cite title="name">{{ s.author.nickname() }}</cite>
-									</small>
-								</blockquote>
-							</div>
-						</div>
-						{% set rcount = rcount + 1 %}
-					{% endfor %}
+							{% set lcount = lcount + 1 %}
+						{% endfor %}
+					</div>
+					<form method="post" action="/post_comment/{{ key }}" accept-charset="utf-8" enctype="multipart/form-data">
+						<p>
+							<label for="leftbox">Left Comment</label>
+							<textarea id="leftbox" name="leftbox" maxlength=140 placeholder="max 140 characters only"></textarea>
+						</p>
+						<p>
+							<input type="submit" id="leftbutton" name="leftb" value="Comment on Left"/>
+						</p>
+						<input type="file" name="left_image" />
+					</form>
 				</div>
-				<form method="post" action="/battle/{{ leftf }}/{{ rightf }}" accept-charset="utf-8">
-					{{ right.csrf_token }}
-					<p>
-						<label for="left">Right Comment</label>
-						{{ right.comment(id="rightbox", maxlength=140, placeholder="max 140 charachers only")|safe }}
-					</p>
 
-					<input type="submit" id="rightbutton" name="rightb" value="Comment on Right"/>
-					<input type="file" name="right_image"/>
-				</form>
+				<div class="span6">
+					<div id = "rightcomments">
+						{% for s in rc %}
+							<div class="row-fluid">
+								<div class="span1">
+									<a href="#" onclick="vote('{{ s.key() }}','rc_up{{ rcount }}','up')">
+										<i class="icon-arrow-up"></i>
+									</a>
+									{% set vote = s.votes %}
+									<div id="rc_up{{ rcount }}">{{ vote }}</div>
+									<a href="#" onclick="vote('{{ s.key() }}','rc_up{{ rcount }}','down')">
+										<i class="icon-arrow-down"></i>
+									</a>
+								</div>
+								<div class="span11">
+									<blockquote id="right_comment">
+										{{ s.comment }} 
+										<small>
+											by <cite title="name">{{ s.author.nickname() }}</cite>
+										</small>
+									</blockquote>
+								</div>
+							</div>
+							{% set rcount = rcount + 1 %}
+						{% endfor %}
+					</div>
+					<form method="post" action="/post_comment/{{ key }}" accept-charset="utf-8">
+						<p>
+							<label for="rightbox">Right Comment</label>
+							<textarea id="rightbox" name="rightbox" maxlength=140 placeholder="max 140 characters only"></textarea>
+						</p>
+						<p>
+							<input type="submit" id="rightbutton" name="rightb" value="Comment on Right"/>
+						</p>
+						<input type="file" name="right_image"/>
+					</form>
+				</div>
 			</div>
 		</div>
-	</div>
-
+		<hr>
+		<p>
+			<a href="#" class="muted" onclick="subscribe()">Subscribe</a> /
+			<a href="#" class="muted" onclick="unsubscribe()">Unsubscribe</a>
+		</p>
 <script>
 
 	$("#leftbox").val("");
 	$("#rightbox").val("");
 
-	// $("#leftbutton").click(function() {
-	// 	$.ajax({
-	// 		url: '/battle/{{ leftf }}/{{ rightf }}',
-	// 		data: { leftcomment : $("#leftbox").val() },
-	// 		type: "POST"
-	// 	}).success(function(data){
-	// 		new_comment_l = '<blockquote id="left_comment">' + data.lc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
-	// 		$("#leftcomments").append(new_comment_l);
-	// 		$("#leftbox").val("");
-	// 		$("#rightbox").val("");
-	// 	})
-
-	// });
-
-
-	// $("#rightbutton").click(function() {
-	// 	$.ajax({
-	// 		url: '/battle/{{ leftf }}/{{ rightf }}',
-	// 		data: { rightcomment : $("#rightbox").val() },
-	// 		type: "POST"
-	// 	}).success(function(data){
-	// 		new_comment_r = '<blockquote id="right_comment">' + data.rc + '<small> by <cite title="name">' + data.author +'</cite></small></blockquote>'
-	// 		$("#rightcomments").append(new_comment_r);
-	// 		$("#leftbox").val("");
-	// 		$("#rightbox").val("");
-	// 	})
-	// });
-
-	function upvote_left(comment,author,when,count){
+	function vote(comment_key,count,up_or_down) {
 		$.ajax({
-			url: '/battle/upvote/{{ leftf }}/{{ rightf }}',
-			data: { side : "left", comment : comment, author : author, when : when },
-			type: "POST"
-		}).success(function(data) {
-			$("#"+count).html(data.votes)
-		})
-	}
-
-	function upvote_right(comment,author,when,count){
-		$.ajax({
-			url: '/battle/upvote/{{ leftf }}/{{ rightf }}',
-			data: { side : "right", comment : comment, author : author, when : when },
-			type: "POST"
-		}).success(function(data) {
-			$("#"+count).html(data.votes)
-		})
-	}
-
-	function downvote_left(comment,author,when,count){
-		$.ajax({
-			url: '/battle/downvote/{{ leftf }}/{{ rightf }}',
-			data: { side : "left", comment : comment, author : author, when : when },
-			type: "POST"
-		}).success(function(data) {
-			$("#"+count).html(data.votes)
-		})
-	}
-
-	function downvote_right(comment,author,when,count){
-		$.ajax({
-			url: '/battle/downvote/{{ leftf }}/{{ rightf }}',
-			data: { side : "right", comment : comment, author : author, when : when },
-			type: "POST"
+			url: '/comment/vote/' + comment_key + "/" + up_or_down
 		}).success(function(data) {
 			$("#"+count).html(data.votes)
 		})
@@ -166,19 +110,21 @@
 
 	function subscribe() {
 		$.ajax({
-			url: '/battle/subscribe/{{ leftf }}/{{ rightf }}',
+			url: '/battle/subscribe/{{ key }}',
 			type: "POST"
 		}).success(function() {
-			alert("Thank you for your subscription. You will receive an email update whenever someone comments on this battle.")
+			$("#alert").html("Thank you for your subscription. You will receive an email update whenever someone comments on this battle.")
+			$("#alert").show();
 		})
 	}
 
 	function unsubscribe() {
 		$.ajax({
-			url: '/battle/unsubscribe/{{ leftf }}/{{ rightf }}',
+			url: '/battle/unsubscribe/{{ key }}',
 			type: "POST"
 		}).success(function() {
-			alert("You have been unsubscribed from the Battle.")
+			$("#alert").html("You have been unsubscribed from the battle.")
+			$("#alert").show()
 		})
 	}
 

@@ -1,44 +1,40 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<h1 id="">WebBattle</h1>
-	<h2 id="">Create a WebBattle</h2>
-	<form action="/" method="post" accept-charset="utf-8">
-		<p>
-			<label for="left">Left</lable>
-            <input type="text" id="left" />
-		</p>
-		<p>
-			<label for="right">Right</lable>
-            <input type="text" id="right" />
-		</p>
-		<div id = "dynamic-tags-list" name"list">
-		</div>
-		<div class="control-group">
-            <div class="controls">
-              <button class="btn" id="add-tags-button">Add tags</button>
+	<legend>
+        <h1>Web Battle</h1>
+    </legend>
+
+    <div class="row">
+        <div class="span8">
+            <h3> Create a Battle </h3>
+            <div class="alert alert-success hide" id="alert">
             </div>
+            <form action="/" method="post" accept-charset="utf-8">
+                <p>
+                    <label for="left">Left</label>
+                    <input type="text" id="left" />
+                </p>
+                <p>
+                    <label for="right">Right</label>
+                    <input type="text" id="right" />
+                </p>
+                <div id = "tags-list" name"list">
+                </div>
+                <p><button class="btn btn-mini" id="add-tags-button">Add Tags</button></p>
+                <p><button id="submit" type="button" class="btn btn-primary btn-large">Create Battle</button></p>
+            </form>
         </div>
-        <p><input id="submit" type="button" value="Save Battle"/></p>
-    </form>
-    <h2>Existing WebBattles</h1>
-    <ul>
-    	{% set count = 0 %}
-    	{% for battle in battles %}
-		{% set votes = battle.upvotes - battle.downvotes %}
-    	<li>
-    		<div id="battle{{ count }}">{{ votes }}</div>
-    		<a href="#" onclick="upvote('{{ battle.left }}','{{ battle.right }}','battle{{ count }}')">
-				<i class="icon-arrow-up"></i>
-			</a>
-			<a href="#" onclick="downvote('{{ battle.left }}','{{ battle.right }}','battle{{ count }}')">
-				<i class="icon-arrow-down"></i>
-			</a>
-			<a href="/battle/{{ battle.left }}/{{ battle.right }}">{{ battle.left }} vs {{ battle.right }}</a>
-    	</li>
-    	{% set count = count + 1 %}
-    	{% endfor %}
-    </ul>
+
+        <div class="span4">
+            <h3> New Battles </h3>
+            {% for recent in recent_battles %}
+                <a href="/battles/{{ recent.key() }}"> {{ recent.left }} vs {{ recent.right }} </a>
+                <br />
+            {% endfor %}
+        </div>
+
+    </div>
 
     <script>
     	var tagno = 0;
@@ -65,57 +61,47 @@
     	}
 
     	$("#add-tags-button").click(function(event) {
-
-            $("#dynamic-items-list input").each(function(){
-                if (this.value == "") {
-                    alert("Please fill the unfilled tag(s)!");                    
-                    event.preventDefault();
-                    exit();
-                }
-            });
-
             tagno = tagno + 1;
             tag = '\
-            <div class="control-group">\
-                <label class="control-label" for="item'+tagno+'"'+'>Item</label>\
-                    <div class="controls">\
-                        <input type="text" id="item'+tagno+'"'+' /> <a href="#" onclick="delete_item('+tagno+')"><small>Delete</small></a>\
-                    </div>\
-                </label>\
+            <div>\
+                <label for="tag'+tagno+'"'+'>Tag</label>\
+                <input type="text" id="tag'+tagno+'"'+' />\
+                <a href="#" onclick="delete_item('+tagno+')">(Delete)</a>\
             </div>\
             ';
-            $("#dynamic-tags-list").append(tag);
+            $("#tags-list").append(tag);
             event.preventDefault();
         })
 
         function delete_item(number) {
-            $("#item"+number).parent().parent().remove()
+            $("#tag"+number).parent().remove()
         }
 
      	$("#submit").click(function(event){
-
-     		i = ""
+     		tag = ""
      		left = $("#left").val()
      		right = $("#right").val()
 
-     		$("#dynamic-tags-list input").each(function(){
+     		$("#tags-list input").each(function(){
                 if (this.value == "") {
                     alert("Please fill/remove the unfilled item(s)!");                    
                     event.preventDefault();
                     exit();
                 }
 
-                i = i + this.value + ",";
+                tag = tag + this.value + ",";
             });
 
             event.preventDefault();
-
+            console.log("Hey")
             $.ajax({
-            	url: '/',
-            	data: { left : left, right : right, tags : i}, 
+            	url: '/addbattle',
+            	data: { left : left, right : right, tags : tag}, 
                 type: "POST"
-            }).success(function() {
-                alert("yay")
+            }).success(function(data) {
+                string = "Your battle <a href='/battles/" + data.key + "'>" + data.left + " vs " + data.right + "</a> is created"
+                $("#alert").html(string)
+                $("#alert").show()
             })
            
      	})
