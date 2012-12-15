@@ -9,6 +9,7 @@ class Battle(db.Model):
 	when = db.DateTimeProperty(auto_now_add = True)
 	subscribers = db.StringListProperty()
 	tags = db.StringListProperty()
+	expirationDate= db.DateTimeProperty()
 
 class Comment(db.Model):
 	comment = db.StringProperty(required = True,multiline = True)

@@ -3,7 +3,7 @@
 {% block content %}
 
 <legend>
-	Existing Battles
+	{{ title }}
 </legend>
 	{% set count = 0 %}
 	{% for battle in battles %}
@@ -21,9 +21,22 @@
 					</div>
 				</div>
 				<div class="span11">
-					<a href="/battles/{{ battle.key() }}">{{ battle.left }} vs {{ battle.right }}</a>
+					<div class="row-fluid">
+						<blockquote>
+							<a href="/battles/{{ battle.key() }}">{{ battle.left }} vs {{ battle.right }}</a>
+							<small>
+								by <cite>{{ battle.author.nickname() }}</cite>
+							</small>
+						</blockquote>
+					</div><br>
+					<div class="row-fluid">
+						{% for tag in battle.tags %}
+						<a href="/battles/tags/{{ tag }}" class="label" >{{ tag }}</a>
+						{% endfor %}
+					</div>
 				</div>
 			</div>
+			
 			<hr>
 	    {% set count = count + 1 %}
 	{% endfor %}
@@ -35,6 +48,7 @@
     			$("#"+count).html(data.votes)
     		})
     	}
+
     </script>
 
 {% endblock %}

@@ -9,6 +9,7 @@ from google.appengine.ext import db
 from datetime import datetime
 
 @app.route('/battle/subscribe/<key>',methods = ['GET','POST'])
+@login_required
 def subscribe(key):
 	battle = Battle.get(key)
 	battle.subscribers.append(str(users.get_current_user().email()))
@@ -16,6 +17,7 @@ def subscribe(key):
 	return Response(status=200)
 
 @app.route('/battle/unsubscribe/<key>',methods = ['GET','POST'])
+@login_required
 def unsubscribe(key):
 	battle = Battle.get(key)
 	battle.subscribers.remove(str(users.get_current_user().email()))
@@ -37,6 +39,7 @@ def check_for_user_vote_battle(battle,vote):
 		return True
 
 @app.route('/battle/vote/<battle_key>/<up_or_down>', methods = ['GET','POST'])
+@login_required
 def vote_battle(battle_key,up_or_down):
 	vote = 1 if up_or_down == "up" else -1
 	battle = Battle.get(battle_key)
@@ -70,6 +73,7 @@ def check_for_user_vote(comment,vote):
 		return True
 
 @app.route('/comment/vote/<comment_key>/<up_or_down>', methods = ['GET','POST'])
+@login_required
 def vote_comment(comment_key,up_or_down):
 	vote = 1 if up_or_down == "up" else -1
 	comment = Comment.get(comment_key)
@@ -90,6 +94,7 @@ def send_emails(key,comment):
 		message.send()
 
 @app.route('/post_comment/<key>',methods=['POST'])
+@login_required
 def post_comment(key):
 	battle = Battle.get(key)
 	now = datetime.now()
@@ -110,23 +115,40 @@ def left_right(key):
 	battle = Battle.get(key)
 	left_comments = Comment.all().ancestor(battle).order('-votes').filter('side =','left')
 	right_comments = Comment.all().ancestor(battle).order('-votes').filter('side =','right')
+	if battle.expirationDate and battle.expirationDate < datetime.now():
+			return render_template('results.html',leftf=battle.left,rightf=battle.right,lc=left_comments,rc=right_comments)
 	return render_template('battle.html',key=key,
 		leftf=battle.left,rightf=battle.right,
 		lc=left_comments,rc=right_comments)
 
+@app.route('/battles/tags/<tag>',methods=['GET','POST'])
+def search_tag(tag):
+	battle_with_tags = []
+	battles = Battle.all()
+	for battle in battles:
+		for each_tag in battle.tags:
+			if each_tag.lower() == tag.lower():
+				battle_with_tags.append(battle)
+	return render_template('all_battles.html',battles=battle_with_tags,title="Battles with tag " + tag) 
+
 @app.route('/battles')
 def all_battles():
 	battles = Battle.all()
-	return render_template('all_battles.html',battles=battles)
+	return render_template('all_battles.html',battles=battles,title="Existing Battles")
 
 @app.route('/addbattle',methods=['GET','POST'])
+@login_required
 def add_a_battle():
 	left = request.form.get('left')
 	right = request.form.get('right')
-	battle = Battle(left=left, right=right, author = users.get_current_user())
+	battle = Battle(left=left,
+					right=right,
+					author = users.get_current_user())
 	for tag in request.form.get('tags').split(','):
 		if not tag == '':
 			battle.tags.append(tag)
+	if request.form.has_key('datepicker'):
+		battle.expirationDate = datetime.strptime(request.form.get('datepicker'),"%m/%d/%Y")
 	battle.put()
 	return jsonify(key=str(battle.key()),left=left,right=right)
 

@@ -1,6 +1,8 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
 		<link href="/css/bootstrap.css" rel="stylesheet">
@@ -28,10 +30,14 @@
 	          <a class="brand" href="/">Web Battle</a>
 	          <div class="nav-collapse collapse">
 	            <ul class="nav">
-	              <li class="active"><a href="#">Home</a></li>
+	              <li><a href="/battles">All Battles</a></li>
 	              <li><a href="#about">About</a></li>
 	              <li><a href="#contact">Contact</a></li>
 	            </ul>
+	            <form class="navbar-form pull-right" action="">
+              		<input class="span3" type="text" id="search_tag" placeholder="Enter tags to search">
+              		<button class="btn" id="search">Search</button>
+            	</form>
 	          </div><!--/.nav-collapse -->
 	        </div>
 	      </div>
@@ -41,5 +47,18 @@
 	      {% block content %}
 	      {% endblock %}
 	    </div> <!-- /container -->
+
+	    <script type="text/javascript">
+
+	    	$("#search").click(function(event) {
+       			window.location = "http://localhost:8080/battles/tags/" + $("#search_tag").val();
+       			event.preventDefault();
+     		});
+
+     		$(function() {
+       			$( "#datepicker" ).datepicker();
+  			});
+
+	    </script>
 	</body>
 </html>

@@ -19,10 +19,15 @@
                     <label for="right">Right</label>
                     <input type="text" id="right" />
                 </p>
+                <p>Expiration Date: <input type="text" id="datepicker" /></p>
                 <div id = "tags-list" name"list">
                 </div>
-                <p><button class="btn btn-mini" id="add-tags-button">Add Tags</button></p>
-                <p><button id="submit" type="button" class="btn btn-primary btn-large">Create Battle</button></p>
+                <p>
+                    <button class="btn btn-mini" id="add-tags-button">Add Tags</button>
+                </p>
+                <p>
+                    <button id="submit" type="button" class="btn btn-primary btn-large">Create Battle</button>
+                </p>
             </form>
         </div>
 
@@ -39,6 +44,9 @@
     <script>
     	var tagno = 0;
         var tags = ""
+        $("#left").val("")
+        $("#right").val("")
+
 
     	function upvote(left,right,count){
     		$.ajax({
