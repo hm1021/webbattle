@@ -8,100 +8,123 @@
 	<legend>
 		<h1>Battle of {{ leftf }} vs {{ rightf }}</h1>
 	</legend>
+	<p>
+		<a href="#" class="muted" style="background-color: #eee" onclick="subscribe()">Subscribe</a> /
+		<a href="#" class="muted" style="background-color: #eee" onclick="unsubscribe()">Unsubscribe</a>
+	</p>
 
 	<div id="alert" class="alert alert-success hide">
 	</div>
-		<div class="container-fluid">
-			<div class="row-fluid">
-				<div class="span6">
-					<div id = "leftcomments">
-						{% for c in lc %}
-							<div class="row">
-								<div class="span1">
-									<a href="#" onclick="vote('{{ c.key() }}','lc_up{{ lcount }}','up')">
-										<i class="icon-arrow-up"></i>
-									</a>
-									{% set votes = c.votes %}
-									<div id="lc_up{{ lcount }}">{{ votes }}</div>
-									<a href="#" onclick="vote('{{ c.key() }}','lc_up{{ lcount }}','down')">
-										<i class="icon-arrow-down"></i>
-									</a>
-								</div>
-								<div class="span11">
-									<blockquote id="left_comment">
-										{{ c.comment }}
-										{% if c.image_url != "None" %}
-											<img src="{{ c.image_url }}" />
-										{% endif %}
-										<small>
-											by <cite>{{ c.author.nickname() }}</cite>
-										</small>
-									</blockquote>
-								</div>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span5">
+				<div id = "leftcomments">
+					{% for c in lc %}
+						<div class="row">
+							<div class="span1">
+								<a href="#" onclick="vote('{{ c.key() }}','lc_up{{ lcount }}','up')">
+									<i class="icon-arrow-up"></i>
+								</a>
+								{% set votes = c.votes %}
+								<div id="lc_up{{ lcount }}">{{ votes }}</div>
+								<a href="#" onclick="vote('{{ c.key() }}','lc_up{{ lcount }}','down')">
+									<i class="icon-arrow-down"></i>
+								</a>
 							</div>
-							{% set lcount = lcount + 1 %}
-						{% endfor %}
-					</div>
-					<form method="post" action="{{ upload_url }}" accept-charset="utf-8" enctype="multipart/form-data">
-						<p>
-							<label for="leftbox">Left Comment</label>
-							<textarea id="leftbox" name="leftbox" maxlength=140 placeholder="max 140 characters only"></textarea>
-						</p>
-						<p>
-							<input type="submit" id="leftbutton" name="leftb" value="Comment on Left"/>
-						</p>
-						<input type="file" name="left_image" />
-					</form>
+							<div class="span11">
+								<blockquote id="left_comment">
+									{{ c.comment }}
+									{% if c.image_url != "None" %}
+										<br /><a href="{{ c.image_url }}"> <img width="128" height="128" src="{{ c.image_url }}" /> </a><br />
+									{% endif %}
+									<small>
+										by <cite>{{ c.author.nickname() }}</cite>
+									</small>
+								</blockquote>
+								{% if c.author.email() == current_user %}
+									<small><a class="muted" href="/comment/remove/{{ c.key() }}/{{ key }}" id="remove_comment">Remove Comment</a></small>
+								{% endif %}
+								<hr>
+							</div>
+						</div>
+						{% set lcount = lcount + 1 %}
+					{% endfor %}
 				</div>
+				<form method="post" id="left_form" action="{{ upload_url }}" accept-charset="utf-8" enctype="multipart/form-data">
+					<p>
+						<label for="leftbox">Left Comment</label>
+						<textarea id="leftbox" name="leftbox" maxlength=140 placeholder="max 140 characters only"></textarea>
+					</p>
+					<p>
+						<input type="submit" id="leftbutton" name="leftb" value="Comment on Left"/>
+					</p>
+					<input type="file" name="left_image" />
+				</form>
+			</div>
 
-				<div class="span6">
-					<div id = "rightcomments">
-						{% for s in rc %}
-							<div class="row-fluid">
-								<div class="span1">
-									<a href="#" onclick="vote('{{ s.key() }}','rc_up{{ rcount }}','up')">
-										<i class="icon-arrow-up"></i>
-									</a>
-									{% set vote = s.votes %}
-									<div id="rc_up{{ rcount }}">{{ vote }}</div>
-									<a href="#" onclick="vote('{{ s.key() }}','rc_up{{ rcount }}','down')">
-										<i class="icon-arrow-down"></i>
-									</a>
-								</div>
-								<div class="span11">
-									<blockquote id="right_comment">
-										{{ s.comment }} 
-										{% if s.image_url != "None" %}
-											<img src="{{ s.image_url }}" />
-										{% endif %}
-										<small>
-											by <cite title="name">{{ s.author.nickname() }}</cite>
-										</small>
-									</blockquote>
-								</div>
+			<div class="span5">
+				<div id = "rightcomments">
+					{% for s in rc %}
+						<div class="row-fluid">
+							<div class="span1">
+								<a href="#" onclick="vote('{{ s.key() }}','rc_up{{ rcount }}','up')">
+									<i class="icon-arrow-up"></i>
+								</a>
+								{% set vote = s.votes %}
+								<div id="rc_up{{ rcount }}">{{ vote }}</div>
+								<a href="#" onclick="vote('{{ s.key() }}','rc_up{{ rcount }}','down')">
+									<i class="icon-arrow-down"></i>
+								</a>
 							</div>
-							{% set rcount = rcount + 1 %}
-						{% endfor %}
-					</div>
-					<form method="post" action="{{ upload_url }}" accept-charset="utf-8" enctype="multipart/form-data">
-						<p>
-							<label for="rightbox">Right Comment</label>
-							<textarea id="rightbox" name="rightbox" maxlength=140 placeholder="max 140 characters only"></textarea>
-						</p>
-						<p>
-							<input type="submit" id="rightbutton" name="rightb" value="Comment on Right"/>
-						</p>
-						<input type="file" name="right_image"/>
-					</form>
+							<div class="span11">
+								<blockquote id="right_comment">
+									{{ s.comment }} 
+									{% if s.image_url != "None" %}
+										<br /><a href="{{ s.image_url }}"><img width="128" height="128" src="{{ s.image_url }}" /></a><br />
+									{% endif %}
+									<small>
+										by <cite title="name">{{ s.author.nickname() }}</cite>
+									</small>
+								</blockquote>
+								{% if s.author.email() == current_user %}
+									<small><a class="muted" href="/comment/remove/{{ s.key() }}/{{ key }}" id="remove_comment">Remove Comment</a></small>
+								{% endif %}
+								<hr>
+							</div>
+						</div>
+						{% set rcount = rcount + 1 %}
+					{% endfor %}
 				</div>
+				<form method="post" id="right_form" action="{{ upload_url }}" accept-charset="utf-8" enctype="multipart/form-data">
+					<p>
+						<label for="rightbox">Right Comment</label>
+						<textarea id="rightbox" name="rightbox" maxlength=140 placeholder="max 140 characters only"></textarea>
+					</p>
+					<p>
+						<input type="submit" id="rightbutton" name="rightb" value="Comment on Right"/>
+					</p>
+					<input type="file" name="right_image"/>
+				</form>
 			</div>
 		</div>
+	</div>
 		<hr>
-		<p>
-			<a href="#" class="muted" onclick="subscribe()">Subscribe</a> /
-			<a href="#" class="muted" onclick="unsubscribe()">Unsubscribe</a>
-		</p>
 <script>
+
+	$("#left_form").submit(function(){
+		if($("#leftbox").val() == "")
+		{
+			alert("Please enter your comment.")
+			return false
+		}
+	})
+
+	$("#right_form").submit(function(){
+		if($("#rightbox").val() == "") {
+			alert("Please enter your comment.")
+			return false
+		}
+	})
 
 	$("#leftbox").val("");
 	$("#rightbox").val("");

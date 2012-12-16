@@ -9,6 +9,9 @@ handlers:
 - url: /css
   static_dir: webbattle/css
 
+- url: /js
+  static_dir: webbattle/js
+
 - url: /img
   static_dir: webbattle/img
 

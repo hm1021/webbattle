@@ -13,8 +13,9 @@ from werkzeug import parse_options_header
 @login_required
 def subscribe(key):
 	battle = Battle.get(key)
-	battle.subscribers.append(str(users.get_current_user().email()))
-	battle.put()
+	if not battle.subscribers.__contains__(users.get_current_user().email()):
+		battle.subscribers.append(str(users.get_current_user().email()))
+		battle.put()
 	return Response(status=200)
 
 @app.route('/battle/unsubscribe/<key>',methods = ['GET','POST'])
@@ -86,21 +87,8 @@ def send_emails(key,comment):
 		message.body = comment + "\n by " + users.get_current_user().nickname()
 		message.send()
 
-def get_blob_key(request, field_name): 
-	""" 
-	Parse and return the blob key from the file uploaded to the App Engine Blobstore API. 
-	""" 
-	uploaded_file = request.files[field_name] 
-	headers = uploaded_file.headers['Content-Type'] 
-	blob_key = parse_options_header(headers)[1]['blob-key'] 
-	return blob_key
 
-def allowed_file(filename): 
-	"""Check to make sure the file is an image.""" 
-	allowed_extensions = ['jpg', 'jpeg', 'gif', 'png'] 
-	return filename.rsplit('.', 1)[1] in allowed_extensions
-
-@app.route('/post_comment/<key>',methods=['POST'])
+@app.route('/post_comment/<key>',methods=['GET','POST'])
 @login_required
 def post_comment(key):
 	battle = Battle.get(key)
@@ -129,6 +117,7 @@ def post_comment(key):
 		send_emails(key, comment)
 	return left_right(key)
 
+@login_required
 @app.route('/battles/<key>',methods = ['GET','POST'])
 def left_right(key):
 	upload_url = blobstore.create_upload_url('/post_comment/'+key)
@@ -136,11 +125,12 @@ def left_right(key):
 	left_comments = Comment.all().ancestor(battle).order('-votes').filter('side =','left')
 	right_comments = Comment.all().ancestor(battle).order('-votes').filter('side =','right')
 	if battle.expirationDate and battle.expirationDate < datetime.now():
-			return render_template('results.html',leftf=battle.left,rightf=battle.right,lc=left_comments,rc=right_comments)
-	return render_template('battle.html',key=key,
+			return render_template('results.html',battle=battle,leftf=battle.left,rightf=battle.right,lc=left_comments,rc=right_comments)
+	return render_template('battle.html',battle=battle,key=key,
 		leftf=battle.left,rightf=battle.right,
-		lc=left_comments,rc=right_comments,upload_url=upload_url)
+		lc=left_comments,rc=right_comments,upload_url=upload_url,current_user=users.get_current_user().email())
 
+@login_required
 @app.route('/battles/tags/<tag>',methods=['GET','POST'])
 def search_tag(tag):
 	battle_with_tags = []
@@ -149,31 +139,119 @@ def search_tag(tag):
 		for each_tag in battle.tags:
 			if each_tag.lower() == tag.lower():
 				battle_with_tags.append(battle)
-	return render_template('all_battles.html',battles=battle_with_tags,title="Battles with tag " + tag) 
+	return render_template('all_battles.html',battles=battle_with_tags,title="Battles with tag " + tag,current_user=users.get_current_user().email()) 
 
-@app.route('/battles')
+@login_required
+@app.route('/battles',methods=['GET','POST'])
 def all_battles():
 	battles = Battle.all()
-	return render_template('all_battles.html',battles=battles,title="Existing Battles")
+	return render_template('all_battles.html',battles=battles,title="Existing Battles",current_user=users.get_current_user().email())
+
+@login_required
+@app.route('/battles/remove/<key>',methods=['GET','POST'])
+def remove_battle(key):
+	battle = Battle.get(key)
+	if battle.author != users.get_current_user():
+		return messages("You cannot delete this battle as you are not its owner")
+	db.delete(battle)
+	return redirect('/yourbattles')
+
+@login_required
+@app.route('/battles/edit/<key>',methods=['GET','POST'])
+def edit_battle(key):
+	battle = Battle.get(key)
+	if battle.author != users.get_current_user():
+		return messages("You cannot edit this battle as you are not its owner")
+
+	left = request.form.get('left')
+	right = request.form.get('right')
+	date = request.form.get('date')
+	tags = ""
+
+	if battle.tags:
+		for t in battle.tags:
+			tags = tags + t + ','
+	
+	if request.method == 'POST':
+		if check_existing_battle(left,right,battle):
+			return Response(status=400)
+		if date != 'None':
+			battle.expirationDate = date
+		battle.left = left
+		battle.right = right
+		form_tags = []
+		for t in request.form.get('tags').split(','):
+			form_tags.append(t.strip())
+		battle.tags = []
+		for tag in form_tags:
+			if not tag == '':
+				battle.tags.append(tag)
+		battle.put()
+		return Response(status=200)
+	return render_template('edit_battle.html',battle=battle,tags=tags)
+
+@login_required
+@app.route('/messsages/<string>')
+def messages(string):
+	return render_template('messages.html',message=string)
+
+@login_required
+@app.route('/comment/remove/<key>/<battlekey>',methods=['GET','POST'])
+def remove_comment(key,battlekey):
+	comment = Comment.get(key)
+	if comment.author != users.get_current_user():
+		return redirect('/battles/'+battlekey)
+	db.delete(comment)
+	return redirect('/battles/'+battlekey)
+
+def check_existing_battle(left,right,battle=None):
+	existing_battles = Battle.all()
+	for existing in existing_battles:
+		if (existing.left.lower() == left.lower() and existing.right.lower() == right.lower()) or (existing.right.lower() == left.lower() and existing.left.lower() == right.lower()):
+			if not battle:
+				return True
+			elif battle.key() != existing.key():
+				return True
+	return False
 
 @app.route('/addbattle',methods=['GET','POST'])
 @login_required
 def add_a_battle():
 	left = request.form.get('left')
 	right = request.form.get('right')
+	if check_existing_battle(left,right):
+		return Response(status=400)
 	battle = Battle(left=left,
 					right=right,
 					author = users.get_current_user())
 	for tag in request.form.get('tags').split(','):
-		if not tag == '':
-			battle.tags.append(tag)
-	if request.form.has_key('datepicker'):
-		battle.expirationDate = datetime.strptime(request.form.get('datepicker'),"%m/%d/%Y")
+		if not tag.strip() == '' and not contains(battle,tag.strip()):
+			battle.tags.append(tag.strip())
+	if request.form.get('date') != '':
+		battle.expirationDate = datetime.strptime(request.form.get('date'),"%m/%d/%Y")
 	battle.put()
 	return jsonify(key=str(battle.key()),left=left,right=right)
+
+def contains(battle,tag):
+	for t in battle.tags:
+		if t.lower() == tag.lower():
+			return True
+		else:
+			return False
+
+@app.route('/logout')
+def logout():
+	return redirect(users.create_logout_url("/"))
+
+@login_required
+@app.route('/yourbattles')
+def yourbattles():
+	battles = Battle.all().filter('author =',users.get_current_user())
+	return render_template('all_battles.html',battles=battles,title="Your Battles",current_user=users.get_current_user().email())
 
 @app.route('/',methods = ['GET','POST'])
 @login_required
 def index():
+	count = Battle.all().count()
 	recent_battles = Battle.all().order('-when').order('-votes').fetch(5)
-	return render_template('new_index.html', recent_battles=recent_battles)
+	return render_template('new_index.html', count=count, recent_battles=recent_battles)

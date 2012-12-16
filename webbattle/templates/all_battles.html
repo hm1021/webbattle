@@ -28,15 +28,19 @@
 								by <cite>{{ battle.author.nickname() }}</cite>
 							</small>
 						</blockquote>
-					</div><br>
+					</div>
 					<div class="row-fluid">
 						{% for tag in battle.tags %}
 						<a href="/battles/tags/{{ tag }}" class="label" >{{ tag }}</a>
 						{% endfor %}
 					</div>
+					{% if title == "Your Battles" %}
+					<br />
+						<a class="muted" href="/battles/remove/{{ battle.key() }}" id="remove_battle">Delete</a> /
+						<a class="muted" href="/battles/edit/{{ battle.key() }}" id="remove_battle">Edit</a>
+					{% endif %}
 				</div>
 			</div>
-			
 			<hr>
 	    {% set count = count + 1 %}
 	{% endfor %}
@@ -46,6 +50,14 @@
     			url: '/battle/vote/' + key + "/" + up_or_down
     		}).success(function(data){
     			$("#"+count).html(data.votes)
+    		})
+    	}
+
+    	function remove(key) {
+    		$.ajax({
+    			url: 'battles/remove/' + key
+    		}).success(function(data){
+    			alert(data.message)
     		})
     	}
 

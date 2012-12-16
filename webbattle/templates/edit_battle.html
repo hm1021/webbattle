@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<legend>
+	Edit Battle: {{ battle.title }}
+</legend>
+
+<div class="alert alert-success hide" id="alert">
+</div>
+<div class="alert alert-error hide" id="alert-err">
+</div>
+<form action="/edit_battle" method="post" accept-charset="utf-8">
+    <p>
+        <label for="left">Left</label>
+        <input type="text" id="left" value = "{{ battle.left }}" />
+    </p>
+    <p>
+        <label for="right">Right</label>
+        <input type="text" id="right" value = "{{ battle.right }}" />
+    </p>
+    <p>
+        <label for="datepicker">Expiration Date</label>
+        <input type="text" id="datepicker" value = "{{ battle.expirationDate }}" />
+    </p>
+    <div id = "tags-list" name"list">
+        <label for="tags">Tags</label>
+        <input type="text"  value = "{{ tags }}" id="tags" />
+    </div>
+    
+    <p>
+        <button id="submit" type="button" class="btn btn-primary btn-large">Edit Battle</button>
+    </p>
+</form>
+<script>
+
+$("#submit").click(function(event){
+	left = $("#left").val()
+	right = $("#right").val()
+	tag = $("#tags").val()
+	date = $("#datepicker").val();
+
+    event.preventDefault();
+    $.ajax({
+    	url: '/battles/edit/{{ battle.key() }}',
+    	data: { left : left, right : right, tags : tag, date: date}, 
+        type: "POST"
+    }).success(function(data) {
+        string = "Battle edited"
+        $("#alert").html(string)
+        $("#alert").show()
+        $("#alert-err").hide()
+    }).error(function() {
+    	string = "A similar battle exists"
+    	$("#alert-err").html(string)
+        $("#alert-err").show()
+        $("#alert").hide()
+    })
+   
+	})
+</script>
+{% endblock %}

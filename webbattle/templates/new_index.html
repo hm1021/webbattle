@@ -10,6 +10,8 @@
             <h3> Create a Battle </h3>
             <div class="alert alert-success hide" id="alert">
             </div>
+            <div class="alert alert-error hide" id="alert-err">
+            </div>
             <form action="/" method="post" accept-charset="utf-8">
                 <p>
                     <label for="left">Left</label>
@@ -19,12 +21,15 @@
                     <label for="right">Right</label>
                     <input type="text" id="right" />
                 </p>
-                <p>Expiration Date: <input type="text" id="datepicker" /></p>
-                <div id = "tags-list" name"list">
-                </div>
                 <p>
-                    <button class="btn btn-mini" id="add-tags-button">Add Tags</button>
+                    <label for="datepicker">Expiration Date (optional)</label>
+                    <input type="text" id="datepicker" />
                 </p>
+                <div id = "tags-list" name"list">
+                    <label for="tags">Tags (optional)</label>
+                    <input type="text"  placeholder="Enter comma separated tags" id="tags" />
+                </div>
+                
                 <p>
                     <button id="submit" type="button" class="btn btn-primary btn-large">Create Battle</button>
                 </p>
@@ -32,11 +37,13 @@
         </div>
 
         <div class="span4">
-            <h3> New Battles </h3>
-            {% for recent in recent_battles %}
-                <a href="/battles/{{ recent.key() }}"> {{ recent.left }} vs {{ recent.right }} </a>
-                <br />
-            {% endfor %}
+            <div class="row">
+                <h3> New Battles </h3>
+                {% for recent in recent_battles %}
+                    <a href="/battles/{{ recent.key() }}"> {{ recent.left }} vs {{ recent.right }} </a>
+                    <br />
+                {% endfor %}
+            </div>
         </div>
 
     </div>
@@ -46,7 +53,6 @@
         var tags = ""
         $("#left").val("")
         $("#right").val("")
-
 
     	function upvote(left,right,count){
     		$.ajax({
@@ -68,48 +74,27 @@
     		})
     	}
 
-    	$("#add-tags-button").click(function(event) {
-            tagno = tagno + 1;
-            tag = '\
-            <div>\
-                <label for="tag'+tagno+'"'+'>Tag</label>\
-                <input type="text" id="tag'+tagno+'"'+' />\
-                <a href="#" onclick="delete_item('+tagno+')">(Delete)</a>\
-            </div>\
-            ';
-            $("#tags-list").append(tag);
-            event.preventDefault();
-        })
-
-        function delete_item(number) {
-            $("#tag"+number).parent().remove()
-        }
-
      	$("#submit").click(function(event){
-     		tag = ""
      		left = $("#left").val()
      		right = $("#right").val()
-
-     		$("#tags-list input").each(function(){
-                if (this.value == "") {
-                    alert("Please fill/remove the unfilled item(s)!");                    
-                    event.preventDefault();
-                    exit();
-                }
-
-                tag = tag + this.value + ",";
-            });
+            tag = $("#tags").val()
+            date = $("#datepicker").val();
 
             event.preventDefault();
-            console.log("Hey")
             $.ajax({
             	url: '/addbattle',
-            	data: { left : left, right : right, tags : tag}, 
+            	data: { left : left, right : right, tags : tag, date: date}, 
                 type: "POST"
             }).success(function(data) {
                 string = "Your battle <a href='/battles/" + data.key + "'>" + data.left + " vs " + data.right + "</a> is created"
                 $("#alert").html(string)
                 $("#alert").show()
+                $("#alert-err").hide()
+            }).error(function(data) {
+                string = "A similar battle already exists"
+                $("#alert-err").html(string)
+                $("#alert-err").show()
+                $("#alert").hide()
             })
            
      	})
