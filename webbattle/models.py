@@ -17,7 +17,8 @@ class Comment(db.Model):
 	votes = db.IntegerProperty(default = 0)
 	side = db.StringProperty(required = True)
 	when = db.DateTimeProperty(required = True)
-	blob = db.BlobProperty()
+	blob_key = db.StringProperty() 
+	image_url = db.StringProperty(default = "None") 
 
 class Email(db.Model):
 	email_address = db.EmailProperty(required = True)

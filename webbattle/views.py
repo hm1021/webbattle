@@ -4,9 +4,10 @@ from flask import render_template, flash, redirect, url_for, request, jsonify, R
 from flaskext import wtf
 from flaskext.wtf import validators
 from decorator import login_required
-from google.appengine.api import users, mail
-from google.appengine.ext import db
+from google.appengine.api import users, mail, images
+from google.appengine.ext import db, blobstore
 from datetime import datetime
+from werkzeug import parse_options_header
 
 @app.route('/battle/subscribe/<key>',methods = ['GET','POST'])
 @login_required
@@ -48,14 +49,6 @@ def vote_battle(battle_key,up_or_down):
 		battle.put()
 	votes = battle.votes
 	return jsonify(votes=votes)
-	# battle = Battle.get(battle_key)
-	# if up_or_down == "up":
-	# 	battle.votes = battle.votes + 1
-	# else:
-	# 	battle.votes = battle.votes - 1
-	# battle.put()
-	# votes = battle.votes
-	# return jsonify(votes=votes)
 
 
 def check_for_user_vote(comment,vote):
@@ -93,6 +86,20 @@ def send_emails(key,comment):
 		message.body = comment + "\n by " + users.get_current_user().nickname()
 		message.send()
 
+def get_blob_key(request, field_name): 
+	""" 
+	Parse and return the blob key from the file uploaded to the App Engine Blobstore API. 
+	""" 
+	uploaded_file = request.files[field_name] 
+	headers = uploaded_file.headers['Content-Type'] 
+	blob_key = parse_options_header(headers)[1]['blob-key'] 
+	return blob_key
+
+def allowed_file(filename): 
+	"""Check to make sure the file is an image.""" 
+	allowed_extensions = ['jpg', 'jpeg', 'gif', 'png'] 
+	return filename.rsplit('.', 1)[1] in allowed_extensions
+
 @app.route('/post_comment/<key>',methods=['POST'])
 @login_required
 def post_comment(key):
@@ -101,17 +108,30 @@ def post_comment(key):
 	if request.form.has_key('leftbox'):
 		comment = request.form.get('leftbox')
 		left_comment = Comment(parent=battle, comment=comment, author=users.get_current_user(), side="left", when=now)
+		if request.files['left_image']:
+			image_file = request.files['left_image']
+			headers = image_file.headers['Content-Type']
+			blob_key = parse_options_header(headers)[1]['blob-key']
+			left_comment.blob_key = blob_key
+			left_comment.image_url = images.get_serving_url(blob_key)
 		left_comment.put()
 		send_emails(key, comment)
 	elif request.form.has_key('rightbox'):
 		comment = request.form.get('rightbox')
 		right_comment = Comment(parent=battle, comment=comment, author=users.get_current_user(), side="right", when=now)
+		if request.files['right_image']:
+			image_file = request.files['right_image']
+			headers = image_file.headers['Content-Type']
+			blob_key = parse_options_header(headers)[1]['blob-key']
+			right_comment.blob_key = blob_key
+			right_comment.image_url = images.get_serving_url(blob_key)
 		right_comment.put()
 		send_emails(key, comment)
-	return redirect('/battles/'+key)
+	return left_right(key)
 
 @app.route('/battles/<key>',methods = ['GET','POST'])
 def left_right(key):
+	upload_url = blobstore.create_upload_url('/post_comment/'+key)
 	battle = Battle.get(key)
 	left_comments = Comment.all().ancestor(battle).order('-votes').filter('side =','left')
 	right_comments = Comment.all().ancestor(battle).order('-votes').filter('side =','right')
@@ -119,7 +139,7 @@ def left_right(key):
 			return render_template('results.html',leftf=battle.left,rightf=battle.right,lc=left_comments,rc=right_comments)
 	return render_template('battle.html',key=key,
 		leftf=battle.left,rightf=battle.right,
-		lc=left_comments,rc=right_comments)
+		lc=left_comments,rc=right_comments,upload_url=upload_url)
 
 @app.route('/battles/tags/<tag>',methods=['GET','POST'])
 def search_tag(tag):

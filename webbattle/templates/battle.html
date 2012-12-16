@@ -29,7 +29,10 @@
 								</div>
 								<div class="span11">
 									<blockquote id="left_comment">
-										{{ c.comment }} 
+										{{ c.comment }}
+										{% if c.image_url != "None" %}
+											<img src="{{ c.image_url }}" />
+										{% endif %}
 										<small>
 											by <cite>{{ c.author.nickname() }}</cite>
 										</small>
@@ -39,7 +42,7 @@
 							{% set lcount = lcount + 1 %}
 						{% endfor %}
 					</div>
-					<form method="post" action="/post_comment/{{ key }}" accept-charset="utf-8" enctype="multipart/form-data">
+					<form method="post" action="{{ upload_url }}" accept-charset="utf-8" enctype="multipart/form-data">
 						<p>
 							<label for="leftbox">Left Comment</label>
 							<textarea id="leftbox" name="leftbox" maxlength=140 placeholder="max 140 characters only"></textarea>
@@ -68,6 +71,9 @@
 								<div class="span11">
 									<blockquote id="right_comment">
 										{{ s.comment }} 
+										{% if s.image_url != "None" %}
+											<img src="{{ s.image_url }}" />
+										{% endif %}
 										<small>
 											by <cite title="name">{{ s.author.nickname() }}</cite>
 										</small>
@@ -77,7 +83,7 @@
 							{% set rcount = rcount + 1 %}
 						{% endfor %}
 					</div>
-					<form method="post" action="/post_comment/{{ key }}" accept-charset="utf-8">
+					<form method="post" action="{{ upload_url }}" accept-charset="utf-8" enctype="multipart/form-data">
 						<p>
 							<label for="rightbox">Right Comment</label>
 							<textarea id="rightbox" name="rightbox" maxlength=140 placeholder="max 140 characters only"></textarea>
