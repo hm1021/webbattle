@@ -80,6 +80,11 @@
             tag = $("#tags").val()
             date = $("#datepicker").val();
 
+            if (left == "" || right == "") {
+                alert("Please fill the left and right fields");
+                return false;
+            }
+
             event.preventDefault();
             $.ajax({
             	url: '/addbattle',

@@ -1,5 +1,5 @@
 from webbattle import app
-from models import Post, Battle, Comment, UserVote
+from models import Battle, Comment, UserVote
 from flask import render_template, flash, redirect, url_for, request, jsonify, Response, current_app
 from flaskext import wtf
 from flaskext.wtf import validators
@@ -176,7 +176,7 @@ def edit_battle(key):
 		if check_existing_battle(left,right,battle):
 			return Response(status=400)
 		if date != 'None':
-			battle.expirationDate = date
+			battle.expirationDate = datetime.strptime(date,"%m/%d/%Y")
 		battle.left = left
 		battle.right = right
 		form_tags = []
@@ -188,7 +188,7 @@ def edit_battle(key):
 				battle.tags.append(tag)
 		battle.put()
 		return Response(status=200)
-	return render_template('edit_battle.html',battle=battle,tags=tags)
+	return render_template('edit_battle.html',battle=battle,tags=tags,date=battle.expirationDate.strftime("%m/%d/%Y"))
 
 @login_required
 @app.route('/messsages/<string>')
