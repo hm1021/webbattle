@@ -175,7 +175,7 @@ def edit_battle(key):
 	if request.method == 'POST':
 		if check_existing_battle(left,right,battle):
 			return Response(status=400)
-		if date != 'None':
+		if date != 'None' and date != '':
 			battle.expirationDate = datetime.strptime(date,"%m/%d/%Y")
 		battle.left = left
 		battle.right = right
@@ -188,7 +188,8 @@ def edit_battle(key):
 				battle.tags.append(tag)
 		battle.put()
 		return Response(status=200)
-	if battle.expirationDate != 'None':
+
+	if battle.expirationDate:
 		battle_date = battle.expirationDate.strftime("%m/%d/%Y")
 	else:
 		battle_date = 'None'
