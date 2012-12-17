@@ -188,7 +188,11 @@ def edit_battle(key):
 				battle.tags.append(tag)
 		battle.put()
 		return Response(status=200)
-	return render_template('edit_battle.html',battle=battle,tags=tags,date=battle.expirationDate.strftime("%m/%d/%Y"))
+	if battle.expirationDate != 'None':
+		battle_date = battle.expirationDate.strftime("%m/%d/%Y")
+	else:
+		battle_date = 'None'
+	return render_template('edit_battle.html',battle=battle,tags=tags,date=battle_date)
 
 @login_required
 @app.route('/messsages/<string>')
