@@ -80,7 +80,7 @@
             tag = $("#tags").val()
             date = $("#datepicker").val();
 
-            if (left == "" || right == "") {
+            if ($.trim(left) == "" || $.trim(right) == "") {
                 alert("Please fill the left and right fields");
                 return false;
             }

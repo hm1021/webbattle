@@ -167,7 +167,7 @@ def edit_battle(key):
 	right = request.form.get('right')
 	date = request.form.get('date')
 	tags = ""
-
+	
 	if battle.tags:
 		for t in battle.tags:
 			tags = tags + t + ','
@@ -224,6 +224,7 @@ def check_existing_battle(left,right,battle=None):
 def add_a_battle():
 	left = request.form.get('left')
 	right = request.form.get('right')
+	
 	if check_existing_battle(left,right):
 		return Response(status=400)
 	battle = Battle(left=left,

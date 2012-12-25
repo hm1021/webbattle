@@ -38,6 +38,11 @@ $("#submit").click(function(event){
 	tag = $("#tags").val()
 	date = $("#datepicker").val();
 
+    if ($.trim(left) == "" || $.trim(right) == "") {
+                alert("Please fill the left and right fields");
+                return false;
+            }
+
     event.preventDefault();
     $.ajax({
     	url: '/battles/edit/{{ battle.key() }}',
